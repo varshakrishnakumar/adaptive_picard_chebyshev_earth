@@ -55,10 +55,9 @@ void adaptive_picard_chebyshev(double* r0,double* v0, double t0, double tf, doub
   // printf("N %i\t",N);
   // printf("seg %i\n",seg);
 
-
   // Array size for coefficients and solution
-  int coeff_size = (tf/Period + 1.0)*(seg+2.0)*(N+1);
-  // coeff_size = (int) (tf/Period + 1.0)*(seg+2.0)*(N+1);
+  int coeff_size;
+  coeff_size = (int) (tf/Period + 1.0)*(seg+2.0)*(N+1);
 
   /* 2. PREPARE PROPAGATOR
   Compute and store the begin and end times for each segment (based on true
@@ -66,41 +65,39 @@ void adaptive_picard_chebyshev(double* r0,double* v0, double t0, double tf, doub
   // Initialize Arrays
   int M = N;                // # sample points = polynomial degree
   int prep_HS = -1;         // Hot start switch condition
-
   double T2[(M+1)*(N+1)];   // [(M+1)x(N+1)]
-  std::memset( T2, 0.0, ((M+1)*(N+1)*sizeof(double)));
+  memset( T2, 0.0, ((M+1)*(N+1)*sizeof(double)));
   double P2[(N+1)*N];       // [(N+1)xN]
-  std::memset( P2, 0.0, ((N+1)*N*sizeof(double)));
+  memset( P2, 0.0, ((N+1)*N*sizeof(double)));
   double T1[(M+1)*N];       // [(M+1)xN]
-  std::memset( T1, 0.0, ((M+1)*N*sizeof(double)));
+  memset( T1, 0.0, ((M+1)*N*sizeof(double)));
   double P1[N*(N-1)];       // [Nx(N-1)]
-  std::memset( P1, 0.0, (N*(N-1)*sizeof(double)));
+  memset( P1, 0.0, (N*(N-1)*sizeof(double)));
   double Ta[(M+1)*(N-1)];   // [(M+1)x(N-1)]
-  std::memset( Ta, 0.0, ((M+1)*(N-1)*sizeof(double)));
+  memset( Ta, 0.0, ((M+1)*(N-1)*sizeof(double)));
   double A[(N-1)*(M+1)];    // [(N-1)x(M+1)]
-  std::memset( A, 0.0, ((N-1)*(M+1)*sizeof(double)));
+  memset( A, 0.0, ((N-1)*(M+1)*sizeof(double)));
   double t_orig[seg+1];
-  std::memset( t_orig, 0.0, ((seg+1)*sizeof(double)));
+  memset( t_orig, 0.0, ((seg+1)*sizeof(double)));
   double tvec[seg+1];
-  std::memset( tvec, 0.0, ((seg+1)*sizeof(double)));
-
-
+  memset( tvec, 0.0, ((seg+1)*sizeof(double)));
   prepare_propagator(r0,v0,t0,tf,dt,tp,tol,N,M,seg,&prep_HS,t_orig,tvec,P1,P2,T1,T2,A,Ta);
 
   /* 3. PICARD-CHEBYSHEV PROPAGATOR
   Propagate from t0 to tf, iterating on each segment (Picard Iteration), until
   completion. */
-
-  double *ALPHA = (double *) std::calloc((coeff_size*3),sizeof(double));
-  double *BETA = (double *) std::calloc((coeff_size*3),sizeof(double));
+  double *ALPHA;
+  ALPHA = (double *) calloc((coeff_size*3),sizeof(double));
+  double *BETA;
+  BETA = (double *) calloc((coeff_size*3),sizeof(double));
   int total_seg = 0;
   int sz = (int) ceil(1.1*tf/Period)*seg;
   double segment_times[sz];
-  std::memset( segment_times, 0.0, (sz*sizeof(double)));
+  memset( segment_times, 0.0, (sz*sizeof(double)));
   double W1[sz];
-  std::memset( W1, 0.0, (sz*sizeof(double)));
+  memset( W1, 0.0, (sz*sizeof(double)));
   double W2[sz];
-  std::memset( W2, 0.0, (sz*sizeof(double)));
+  memset( W2, 0.0, (sz*sizeof(double)));
   picard_chebyshev_propagator(r0,v0,t0,tf,deg,deg_low,tol,Period,tvec,t_orig,seg,N,M,&prep_HS,coeff_size,soln_size,&total_seg,
     P1,P2,T1,T2,A,Ta,W1,W2,Feval,ALPHA,BETA,segment_times);
 
@@ -108,6 +105,7 @@ void adaptive_picard_chebyshev(double* r0,double* v0, double t0, double tf, doub
   // The Chebyshev coefficients from each of the orbit segments are used to compute
   // the solution (position & velocity) at the user specified times. */
   interpolate(ALPHA,BETA,soln_size,coeff_size,N,segment_times,W1,W2,t0,tf,dt,total_seg,Soln);
+
   free(ALPHA);
   free(BETA);
 }

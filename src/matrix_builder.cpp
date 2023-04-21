@@ -42,17 +42,17 @@ int main(){
 
     // Compute Clenshaw-Curtis Quadrature Constant Matrices
     double T2[(M+1)*(N+1)];
-    std::memset( T2, 0.0, ((M+1)*(N+1)*sizeof(double)));
+    memset( T2, 0.0, ((M+1)*(N+1)*sizeof(double)));
     double P2[(N+1)*N];
-    std::memset( P2, 0.0, ((N+1)*N*sizeof(double)));
+    memset( P2, 0.0, ((N+1)*N*sizeof(double)));
     double T1[(M+1)*N];
-    std::memset( T1, 0.0, ((M+1)*N*sizeof(double)));
+    memset( T1, 0.0, ((M+1)*N*sizeof(double)));
     double P1[N*(N-1)];
-    std::memset( P1, 0.0, (N*(N-1)*sizeof(double)));
+    memset( P1, 0.0, (N*(N-1)*sizeof(double)));
     double Ta[(M+1)*(N-1)];
-    std::memset( Ta, 0.0, ((M+1)*(N-1)*sizeof(double)));
+    memset( Ta, 0.0, ((M+1)*(N-1)*sizeof(double)));
     double A[(N-1)*(M+1)];
-    std::memset( A, 0.0, ((N-1)*(M+1)*sizeof(double)));
+    memset( A, 0.0, ((N-1)*(M+1)*sizeof(double)));
     clenshaw_curtis_ivpII(N,M,T2,P2,T1,P1,Ta,A);
 
     // Build & Store Arrays

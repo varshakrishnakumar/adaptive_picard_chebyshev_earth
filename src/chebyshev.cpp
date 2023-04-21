@@ -34,7 +34,7 @@ void chebyshev(double s, int N, int M, int arg, double* T){
 
   // Cosine Sample Points
   double tau[(M+1)];
-  std::memset( tau, 0.0, ((M+1)*sizeof(double)));
+  memset( tau, 0.0, ((M+1)*sizeof(double)));
   for (int i=0; i<=M; i++){
     tau[i] = s*cos(i*C_PI/M);
   }

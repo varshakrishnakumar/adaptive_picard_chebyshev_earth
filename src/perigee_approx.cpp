@@ -39,24 +39,22 @@ void perigee_approx( double* X, double* normX, double* times, int n, double* rp,
   // Minimum radius
   double min;
   Cmin(normX,n,&min);
-  int *in;
-  in = ind;
-  // printf("n %i\n", n);
+
   // Index corresponding to minimum radius
   double tmp;
-  for (int i=0; i <= n; i++){
+  for (int i=0; i<=n; i++){
     tmp = fabs(normX[i] - min);
     if (tmp < 1e-10){
-      *in = i;
+      *ind = i;
       break;
     }
   }
 
   // State and times at Keplerian perigee
   for (int i=0; i<=2; i++){
-    rp[i] = X[ID2(*in+1,i+1,n+1)];
-    vp[i] = X[ID2(*in+1,i+4,n+1)];
+    rp[i] = X[ID2(*ind+1,i+1,n+1)];
+    vp[i] = X[ID2(*ind+1,i+4,n+1)];
   }
-  *tp    = times[*in];
-  // printf("ind %i\n", in);
+  *tp    = times[*ind];
+
 }

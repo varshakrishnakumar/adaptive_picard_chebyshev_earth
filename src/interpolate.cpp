@@ -45,7 +45,7 @@ void interpolate(double* ALPHA, double* BETA, int soln_size, int coeff_size, int
   int len;
   len = (int) ceil(tf/dt);
   double time_out[len+1];
-  std::memset( time_out, 0.0, (len*sizeof(double)));
+  memset( time_out, 0.0, (len*sizeof(double)));
   time_out[0] = t0;
   for (int ii=1; ii<=len; ii++){
     time_out[ii] = time_out[ii-1] + dt;
@@ -57,14 +57,14 @@ void interpolate(double* ALPHA, double* BETA, int soln_size, int coeff_size, int
 
     // Initialization
     double Beta[N*3];
-    std::memset( Beta, 0.0, (N*3*sizeof(double)));
+    memset( Beta, 0.0, (N*3*sizeof(double)));
     double Alpha[(N+1)*3];
-    std::memset( Alpha, 0.0, ((N+1)*3*sizeof(double)));
+    memset( Alpha, 0.0, ((N+1)*3*sizeof(double)));
     int sz = (int)ceil(1.1*tf/total_segs/dt);
     double tt[sz];
-    std::memset( tt, 0.0, ((sz)*sizeof(double)));
+    memset( tt, 0.0, ((sz)*sizeof(double)));
     double tau[sz];
-    std::memset( tau, 0.0, ((sz)*sizeof(double)));
+    memset( tau, 0.0, ((sz)*sizeof(double)));
 
     double w1, w2;
     w1 = W1[i-1];
@@ -93,9 +93,9 @@ void interpolate(double* ALPHA, double* BETA, int soln_size, int coeff_size, int
 
     // Chebyshev Velocity & Position Matrices
     double Tv[cnt*N];
-    std::memset( Tv, 0.0, ((cnt*N)*sizeof(double)));
+    memset( Tv, 0.0, ((cnt*N)*sizeof(double)));
     double Tp[cnt*(N+1)];
-    std::memset( Tp, 0.0, ((cnt*(N+1))*sizeof(double)));
+    memset( Tp, 0.0, ((cnt*(N+1))*sizeof(double)));
     for (int t=1; t<=cnt; t++){
       for (int kk=0; kk<=N-1; kk++){
         // Velocity
@@ -114,7 +114,7 @@ void interpolate(double* ALPHA, double* BETA, int soln_size, int coeff_size, int
       Beta[ID2(p,3,N)] = BETA[ID2(p+((i-1)*N),3,coeff_size)];
     }
     double v_interp[cnt*3];
-    std::memset( v_interp, 0.0, ((cnt*3)*sizeof(double)));
+    memset( v_interp, 0.0, ((cnt*3)*sizeof(double)));
     matmul(Tv,Beta,v_interp,cnt,N,3,cnt,N,cnt);
 
     // Velocity
@@ -131,7 +131,7 @@ void interpolate(double* ALPHA, double* BETA, int soln_size, int coeff_size, int
       Alpha[ID2(p,3,N+1)] = ALPHA[ID2(p+((i-1)*(N+1)),3,coeff_size)];
     }
     double x_interp[cnt*3];
-    std::memset( x_interp, 0.0, ((cnt*3)*sizeof(double)));
+    memset( x_interp, 0.0, ((cnt*3)*sizeof(double)));
     matmul(Tp,Alpha,x_interp,cnt,N+1,3,cnt,N+1,cnt);
     // Position
     for (int p=1; p<=cnt; p++){

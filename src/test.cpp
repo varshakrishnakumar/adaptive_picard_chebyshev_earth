@@ -28,6 +28,9 @@ int main(){
   // Initialize Input Variables
   // LEO
   
+  // Input the deg_low from user
+  // printf("Enter deg_low for low fidelity: ");
+  // scanf("%d", &deg_low);
 
   
   double r0[3] = {7000.0, 0.0, 0.0};                // Initial Position (km)
@@ -66,28 +69,24 @@ int main(){
     soln_size = 2;
   }
   double *Soln;
-  Soln = (double *) std::calloc(soln_size*6,sizeof(double));       // Position (km) & Velocity (km/s)
+  Soln = (double *) calloc(soln_size*6,sizeof(double));       // Position (km) & Velocity (km/s)
 
   double Feval[2] = {0.0};
 
   // Call Adaptive Picard Chebyshev Integrator
   clock_t startTime = clock();
-  for (unsigned int tt=0; tt<=1; tt++) {
+  for (int tt=0; tt<=1; tt++){
+    // printf("check 1");
     adaptive_picard_chebyshev(r0,v0,t0,tf,dt,deg,deg_low,tol,soln_size,Feval,Soln);
   }
-  // std::cout<< "apc-end" << std::endl;
   clock_t endTime = clock();
   float elapsedTime = ((float) (endTime - startTime))/CLOCKS_PER_SEC/(1.0);
-  // std::cout << "Elapsed time: " << std::endl;
-  // std::cout << elapsedTime << std::endl;
   printf("Elapsed time: %f s\t",elapsedTime);
 
   // Number of function evaluations
   int total;
   total = (int) ceil(Feval[0] + Feval[1]*pow(6.0,2)/pow(deg,2));
   printf("Func Evals: %i\t",total);
-  // std::cout << "Func Evals: " <<std::endl;
-  // std::cout << total << std::endl;
 
   // Save as text file [time r v H]
   double state[6] = {0.0};
@@ -116,8 +115,6 @@ int main(){
     }
     fprintf(fID,"\n");
   }
-  // std::cout <<"Hmax: " <<std::endl;
-  // std::cout << Hmax << std::endl;
   printf("Hmax %1.16E\n",Hmax);
   fclose(fID);
   free(Soln);

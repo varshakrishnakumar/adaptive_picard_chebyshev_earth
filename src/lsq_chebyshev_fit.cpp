@@ -40,7 +40,7 @@ void lsq_chebyshev_fit(double s, int N, int M, double* T, double* A){
 
   // Weight Matrix
   double W[(M+1)*(M+1)];
-  std::memset( W, 0.0, ((M+1)*(M+1)*sizeof(double)));
+  memset( W, 0.0, ((M+1)*(M+1)*sizeof(double)));
   for (int i=1; i<=M+1; i++){
     for (int j=1; j<=M+1; j++){
       if (i == j){
@@ -53,7 +53,7 @@ void lsq_chebyshev_fit(double s, int N, int M, double* T, double* A){
 
   // V Matrix
   double V[(N+1)*(N+1)];
-  std::memset( V, 0.0, ((N+1)*(N+1)*sizeof(double)));
+  memset( V, 0.0, ((N+1)*(N+1)*sizeof(double)));
   for (int i=1; i<=N+1; i++){
     for (int j=1; j<=N+1; j++){
       if (i == j){
@@ -71,7 +71,7 @@ void lsq_chebyshev_fit(double s, int N, int M, double* T, double* A){
 
   // T Transpose
   double TT[(N+1)*(M+1)];
-  std::memset( TT, 0.0, ((N+1)*(M+1)*sizeof(double)));
+  memset( TT, 0.0, ((N+1)*(M+1)*sizeof(double)));
   for (int i=1; i<=N+1; i++){
     for (int j=1; j<=M+1; j++){
       TT[ID2(i,j,N+1)] = T[ID2(j,i,M+1)];
@@ -80,7 +80,7 @@ void lsq_chebyshev_fit(double s, int N, int M, double* T, double* A){
 
   // Least Squares Operator
   double TTW[(M+1)*(M+1)];
-  std::memset( TTW, 0.0, ((M+1)*(M+1)*sizeof(double)));
+  memset( TTW, 0.0, ((M+1)*(M+1)*sizeof(double)));
   matmul(TT,W,TTW,N+1,M+1,M+1,N+1,M+1,N+1);
   matmul(V,TTW,A,N+1,N+1,M+1,N+1,N+1,N+1);
 

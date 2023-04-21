@@ -63,29 +63,29 @@ void picard_iteration(double* Xint, double* Vint, double* X, double* V, double* 
   double del_aECI[3]  = {0.0};
 
   double G[(M+1)*3];
-  std::memset( G, 0.0, ((M+1)*3*sizeof(double)));
+  memset( G, 0.0, ((M+1)*3*sizeof(double)));
   double beta[N*3];
-  std::memset( beta, 0.0, (N*3*sizeof(double)));
+  memset( beta, 0.0, (N*3*sizeof(double)));
   double gamma[N*3];
-  std::memset( gamma, 0.0, (N*3*sizeof(double)));
+  memset( gamma, 0.0, (N*3*sizeof(double)));
   double alpha[(N+1)*3];
-  std::memset( alpha, 0.0, ((N+1)*3*sizeof(double)));
+  memset( alpha, 0.0, ((N+1)*3*sizeof(double)));
   double kappa[(N+1)*3];
-  std::memset( kappa, 0.0, ((N+1)*3*sizeof(double)));
+  memset( kappa, 0.0, ((N+1)*3*sizeof(double)));
   double Xorig[(M+1)*3];
-  std::memset( Xorig, 0.0, ((M+1)*3*sizeof(double)));
+  memset( Xorig, 0.0, ((M+1)*3*sizeof(double)));
   double Vorig[(M+1)*3];
-  std::memset( Vorig, 0.0, ((M+1)*3*sizeof(double)));
+  memset( Vorig, 0.0, ((M+1)*3*sizeof(double)));
   double Xnew[(M+1)*3];
-  std::memset( Xnew, 0.0, ((M+1)*3*sizeof(double)));
+  memset( Xnew, 0.0, ((M+1)*3*sizeof(double)));
   double Vnew[(M+1)*3];
-  std::memset( Vnew, 0.0, ((M+1)*3*sizeof(double)));
+  memset( Vnew, 0.0, ((M+1)*3*sizeof(double)));
   double xECEFp[(M+1)*3];
-  std::memset( xECEFp, 0.0, ((M+1)*3*sizeof(double)));
+  memset( xECEFp, 0.0, ((M+1)*3*sizeof(double)));
   double xECIp[(M+1)*3];
-  std::memset( xECIp, 0.0, ((M+1)*3*sizeof(double)));
+  memset( xECIp, 0.0, ((M+1)*3*sizeof(double)));
   double del_a[(M+1)*3];
-  std::memset( del_a, 0.0, ((M+1)*3*sizeof(double)));
+  memset( del_a, 0.0, ((M+1)*3*sizeof(double)));
 
   int itr, MaxIt;
   double err, w2;
@@ -120,9 +120,9 @@ void picard_iteration(double* Xint, double* Vint, double* X, double* V, double* 
 
     // Velocity
     double tmp1[(N-1)*(M+1)];
-    std::memset( tmp1, 0.0, ((N-1)*(M+1)*sizeof(double)));
+    memset( tmp1, 0.0, ((N-1)*(M+1)*sizeof(double)));
     double tmp2[(N-1)*(M+1)];
-    std::memset( tmp2, 0.0, ((N-1)*(M+1)*sizeof(double)));
+    memset( tmp2, 0.0, ((N-1)*(M+1)*sizeof(double)));
     matmul(A,G,tmp1,N-1,M+1,3,N-1,M+1,N-1);
     matmul(P1,tmp1,tmp2,N,N-1,3,N,N-1,N);
     for (int i=1; i<=N; i++){
@@ -137,7 +137,7 @@ void picard_iteration(double* Xint, double* Vint, double* X, double* V, double* 
 
     // Position
     double tmp3[(N+1)*(M+1)];
-    std::memset( tmp3, 0.0, ((N+1)*(M+1)*sizeof(double)));
+    memset( tmp3, 0.0, ((N+1)*(M+1)*sizeof(double)));
     matmul(P2,beta,tmp3,N+1,N,3,N+1,N,N+1);
     for (int i=1; i<=N+1; i++){
       for (int j=1; j<=3; j++){
@@ -171,9 +171,9 @@ void picard_iteration(double* Xint, double* Vint, double* X, double* V, double* 
 
     // Linear Error Correction Velocity Coefficients
     double tmp4[(N-1)*(M+1)];
-    std::memset( tmp4, 0.0, ((N-1)*(M+1)*sizeof(double)));
+    memset( tmp4, 0.0, ((N-1)*(M+1)*sizeof(double)));
     double tmp5[(N-1)*(M+1)];
-    std::memset( tmp5, 0.0, ((N-1)*(M+1)*sizeof(double)));
+    memset( tmp5, 0.0, ((N-1)*(M+1)*sizeof(double)));
     matmul(A,del_a,tmp4,N-1,M+1,3,N-1,M+1,N-1);
     matmul(P1,tmp4,tmp5,N,N-1,3,N,N-1,N);
     for (int i=1; i<=N; i++){
@@ -195,7 +195,7 @@ void picard_iteration(double* Xint, double* Vint, double* X, double* V, double* 
 
     // Corrected Position
     double tmp6[(N+1)*(M+1)];
-    std::memset( tmp6, 0.0, ((N+1)*(M+1)*sizeof(double)));
+    memset( tmp6, 0.0, ((N+1)*(M+1)*sizeof(double)));
     matmul(P2,gamma,tmp6,N+1,N,3,N+1,N,N+1);
     for (int i=1; i<=N+1; i++){
       for (int j=1; j<=3; j++){

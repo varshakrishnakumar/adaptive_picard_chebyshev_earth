@@ -62,9 +62,9 @@ void picard_chebyshev_propagator(double* r0, double* v0, double t0, double t_fin
   double w1, w2, tf;
 
   double HotX[seg*(M+1)*3];
-  std::memset( HotX, 0.0, (seg*(M+1)*3*sizeof(double)));
+  memset( HotX, 0.0, (seg*(M+1)*3*sizeof(double)));
   double HotV[seg*(M+1)*3];
-  std::memset( HotV, 0.0, (seg*(M+1)*3*sizeof(double)));
+  memset( HotV, 0.0, (seg*(M+1)*3*sizeof(double)));
 
   // PROPAGATION
   while (loop == 0){
@@ -91,17 +91,17 @@ void picard_chebyshev_propagator(double* r0, double* v0, double t0, double t_fin
     z0[3] = v0[0]; z0[4] = v0[1]; z0[5] = v0[2];
 
     double tau[M+1];
-    std::memset( tau, 0.0, ((M+1)*sizeof(double)));
+    memset( tau, 0.0, ((M+1)*sizeof(double)));
     double times[M+1];
-    std::memset( times, 0.0, ((M+1)*sizeof(double)));
+    memset( times, 0.0, ((M+1)*sizeof(double)));
     double X[(M+1)*3];
-    std::memset( X, 0.0, ((M+1)*3*sizeof(double)));
+    memset( X, 0.0, ((M+1)*3*sizeof(double)));
     double V[(M+1)*3];
-    std::memset( V, 0.0, ((M+1)*3*sizeof(double)));
+    memset( V, 0.0, ((M+1)*3*sizeof(double)));
     double Beta[N*3];
-    std::memset( Beta, 0.0, (N*3*sizeof(double)));
+    memset( Beta, 0.0, (N*3*sizeof(double)));
     double Alpha[(N+1)*3];
-    std::memset( Alpha, 0.0, ((N+1)*3*sizeof(double)));
+    memset( Alpha, 0.0, ((N+1)*3*sizeof(double)));
 
     // KEPLERIAN WARM START
     for (int cnt=0; cnt<=M; cnt++){
@@ -117,11 +117,11 @@ void picard_chebyshev_propagator(double* r0, double* v0, double t0, double t_fin
     }
     // Warm Start
     double WSX[(M+1)*3];
-    std::memset( WSX, 0.0, ((M+1)*3*sizeof(double)));
+    memset( WSX, 0.0, ((M+1)*3*sizeof(double)));
     double WSV[(M+1)*3];
-    std::memset( WSV, 0.0, ((M+1)*3*sizeof(double)));
-    std::memcpy(WSX,X,(M+1)*3*sizeof(double));
-    std::memcpy(WSV,V,(M+1)*3*sizeof(double));
+    memset( WSV, 0.0, ((M+1)*3*sizeof(double)));
+    memcpy(WSX,X,(M+1)*3*sizeof(double));
+    memcpy(WSV,V,(M+1)*3*sizeof(double));
 
     // HOT START (after 1+ orbits)
     // if (hot == 1){

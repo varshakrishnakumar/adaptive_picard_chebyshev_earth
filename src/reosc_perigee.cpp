@@ -49,16 +49,16 @@ void reosc_perigee(double* X, double* V, double* times, double* Alpha, double* B
   double w1, w2, t1, t2, e, TAU_old, TAU, f_old, f_new, TAU_new, df_dtau, err;
   int itrf;
   double TA[N+1];
-  std::memset( TA, 0.0, ((N+1)*sizeof(double)));
+  memset( TA, 0.0, ((N+1)*sizeof(double)));
   double TB[N];
-  std::memset( TB, 0.0, ((N)*sizeof(double)));
+  memset( TB, 0.0, ((N)*sizeof(double)));
 
   // Compute True Anomaly (along trajectory)
   double r[3]      = {0.0};
   double v[3]      = {0.0};
   double elm[10]   = {0.0};
   double fvec[M+1];
-  std::memset( fvec, 0.0, ((M+1)*sizeof(double)));
+  memset( fvec, 0.0, ((M+1)*sizeof(double)));
   for (int i=1; i<=M+1; i++){
     for (int j=1; j<=3; j++){
       r[j-1] = X[ID2(i,j,M+1)];

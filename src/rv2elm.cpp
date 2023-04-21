@@ -41,26 +41,16 @@
 void rv2elm(double* r, double* v, double tol, double* elm){
 
   // Position & Velocity Magnitudes
-  double *ra;
-  ra = r;
-
-  double *ve;
-  ve = v;
-
   double R, V;
-  // printf("r %f\n", ra[0]);
-  // std::cout<< ra[0] << std::endl;
-  R = sqrt(ra[0]*ra[0] + ra[1]*ra[1] + ra[2]*ra[2]);
-  V = sqrt(ve[0]*ve[0] + ve[1]*ve[1] + ve[2]*ve[2]);
-  // printf("R %f\n", R);
-  // printf("V %f\n", V);
+  R = sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
+  V = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
 
   // Angular Momentum Vector
   double H;
   double h[3] = {0.0};
-  cross_product_3D(ra,ve,h);
+  cross_product_3D(r,v,h);
   H = sqrt(h[0]*h[0] + h[1]*h[1] + h[2]*h[2]);
-  // printf("H %f\n", H);
+
   // Line of Nodes Vector
   double nvec[3] = {0.0};
   double vert[3] = {0.0};
@@ -70,24 +60,20 @@ void rv2elm(double* r, double* v, double tol, double* elm){
   vert[2] = 1.0;
   cross_product_3D(vert,h,nvec);
   n = sqrt(nvec[0]*nvec[0] + nvec[1]*nvec[1] + nvec[2]*nvec[2]);
-  // printf("n %f\n", n);
 
   // Eccentricity Vector
   double evec[3] = {0.0};
   double rv, e;
-  rv = ra[0]*ve[0] + ra[1]*ve[1] + ra[2]*ve[2];
+  rv = r[0]*v[0] + r[1]*v[1] + r[2]*v[2];
   for (int i=0; i<=2; i++){
-    evec[i] = 1/C_MU*((pow(V,2) - C_MU/R)*ra[i] - rv*ve[i]);
+    evec[i] = 1/C_MU*((pow(V,2) - C_MU/R)*r[i] - rv*v[i]);
   }
   e = sqrt(evec[0]*evec[0] + evec[1]*evec[1] + evec[2]*evec[2]);
-
-  // printf("e %f\n", e);
-
 
   // Energy
   double xi;
   xi      = (pow(V,2))/2 - C_MU/R;
-  // printf("xi %f\n", xi);
+
   // Semimajor Axis (a) & Semillatus Rectum (p)
   double a, p;
   if (fabs(1-e) <= tol){
@@ -98,12 +84,11 @@ void rv2elm(double* r, double* v, double tol, double* elm){
     a   = -C_MU/2/xi;
     p   = a * (1 - pow(e,2));
   }
-  // printf("a %f\n", a);
 
   // Inclination
   double inc;
   inc     = acos(h[2]/H);
-  // printf("inc %f\n", inc);
+
   // Right Ascension of Ascending Node
   double Om;
   if (fabs(inc) >= tol){
@@ -115,7 +100,6 @@ void rv2elm(double* r, double* v, double tol, double* elm){
     Om = 0.0;
   }
 
-  // printf("Om %f\n", Om);
   // Argument of Perigee
   double w;
   if (fabs(inc) >= tol){
@@ -126,12 +110,11 @@ void rv2elm(double* r, double* v, double tol, double* elm){
   } else if (fabs(inc) < tol){
     w = 0.0;
   }
-  // printf("w %f\n", w);
 
   // True Anomaly
   double f;
   double temp;
-  temp = (evec[0]*ra[0] + evec[1]*ra[1] + evec[2]*ra[2]) / R / e;
+  temp = (evec[0]*r[0] + evec[1]*r[1] + evec[2]*r[2]) / R / e;
   if (fabs(temp-1.0) <= tol){
     f = 0.0;
   }
@@ -142,8 +125,6 @@ void rv2elm(double* r, double* v, double tol, double* elm){
   if (rv < 0){
     f = 2*C_PI - f;
   }
-  // printf("f %f\n", f);
-  // printf("temp %f\n", temp);
 
   // Mean Anomaly & Eccentric Anomaly
   double E, M;
@@ -155,8 +136,6 @@ void rv2elm(double* r, double* v, double tol, double* elm){
   if (M < 0){
     M = 2*C_PI + M;
   }
-  // printf("E %f\n", E);
-  // printf("M %f\n", M);
 
   // Special Cases
   // Elliptical Equatorial (ascending node undefined)
@@ -168,43 +147,29 @@ void rv2elm(double* r, double* v, double tol, double* elm){
   }
   // Circular Inclined (perigee undefined)
   else if (inc >= tol && e < tol){
-    s = acos((nvec[0]*ra[0] + nvec[1]*ra[1] + nvec[2]*ra[2])/R/n);    // Argument of Latitude
-    if (ra[2] < 0){
+    s = acos((nvec[0]*r[0] + nvec[1]*r[1] + nvec[2]*r[2])/R/n);    // Argument of Latitude
+    if (r[2] < 0){
       s = 2*C_PI - s;
     }
     // Circular Equatorial (perigee & ascending node undefined)
     else if (inc < tol && e < tol){
-      s = acos(ra[0]/R);
-      if (ra[1] < 0){
+      s = acos(r[0]/R);
+      if (r[1] < 0){
         s = 2*C_PI - s;    // True Longitude
       }
     }
   }
-  // printf("s %f\n", s);
 
-  // OUTPUT
-  elm[0] = p;
-  elm[1] = a;
-  elm[2] = e;
-  elm[3] = inc;
-  elm[4] = Om;
-  elm[5] = w;
-  elm[6] = f;
-  elm[7] = E;
-  elm[8] = M;
-  elm[9] = s;
+// OUTPUT
+elm[0] = p;
+elm[1] = a;
+elm[2] = e;
+elm[3] = inc;
+elm[4] = Om;
+elm[5] = w;
+elm[6] = f;
+elm[7] = E;
+elm[8] = M;
+elm[9] = s;
 
-
-// // OUTPUT
-// elm[0] = p;
-// elm[1] = a;
-// elm[2] = e;
-// elm[3] = inc;
-// elm[4] = Om;
-// elm[5] = w;
-// elm[6] = f;
-// elm[7] = E;
-// elm[8] = M;
-// elm[9] = s;
-// // printf("elm %f\n", elm[0]);
 }

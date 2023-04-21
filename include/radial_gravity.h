@@ -25,6 +25,4 @@
 
 void radial_gravity(double* X, double tol, double deg, double* grav);
 
-double dot_product(double vector_a[], double vector_b[])
-
 // #endif

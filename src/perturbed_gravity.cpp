@@ -32,7 +32,7 @@
 #include "const.h"
 #include "c_functions.h"
 #include "matrix_loader.h"
-#include "radial_adaptive.h"
+#include "radial_gravity.h"
 
 #define debug_grav 0
 #define debug_grav_itr 0
@@ -329,15 +329,15 @@
 
    double grav = 0.0;
    if (grav_model == 0){
-       radial_adaptive(Xo,tol,deg,&grav);
+       radial_gravity(Xo,tol,deg,&grav);
        if (grav < deg_low){
            deg_low = grav;
        }
-       EGM2008(state, &dstate[3], deg_low); 
+       EGM2008(state, &dstate[3], deg_low); // VARSHA: replace with EGM2008
    }
    if (grav_model == 1){
-       radial_adaptive(Xo,tol,deg,&grav);
-       EGM2008(state, &dstate[3], grav);    
+       radial_gravity(Xo,tol,deg,&grav);
+       EGM2008(state, &dstate[3], grav);    // VARSHA: replace with EGM2008
    }
    Feval[0] = Feval[0] + pow(grav,2)/pow(deg,2);
 

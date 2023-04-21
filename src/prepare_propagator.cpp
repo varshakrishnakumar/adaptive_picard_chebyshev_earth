@@ -94,7 +94,7 @@ void prepare_propagator(double* r0, double* v0, double t0, double t_final, doubl
   int len;
   len = ceil(t_final/dt);
   double time_out[len];
-  std::memset( time_out, 0.0, (len*sizeof(double)));
+  memset( time_out, 0.0, (len*sizeof(double)));
   time_out[0] = t0;
   for (int i=1; i<len; i++){
     time_out[i] = time_out[i-1] + dt;

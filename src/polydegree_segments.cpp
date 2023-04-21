@@ -51,7 +51,7 @@
 #include "matrix_loader.h"
 
 void polydegree_segments(double* r0, double* v0, double deg, double tol, double* Feval, int* seg, int* degree, double* tp, double* Period ) {
-    
+
   // Tolerances
   double coeff_tol = tol/100.0;
   double fit_tol   = tol/10.0;
@@ -59,33 +59,26 @@ void polydegree_segments(double* r0, double* v0, double deg, double tol, double*
   // Compute Keplerian Orbit Period
   double a, e;
   double elm[10] = {0.0};
-  // printf("r %f\n", r0);
   rv2elm(r0,v0,tol,elm);
   a      = elm[1];
   e      = elm[2];
-  // printf("a %f\n", a);
-  // printf("e %f\n", e);
-  double *per;
-  per = Period;
+  *Period = 2.0*C_PI*sqrt(pow(a,3)/C_MU);
 
-  *per = 2.0*C_PI*(sqrt((pow(a,3))/C_MU));
-  // printf("period %i\n", per);
   // Compute F&G Analytical Solution for 1 Orbit
   int n = 100;
   double w1, w2, z0[6], z[6];
   double tau[300];
-  std::memset( tau, 0.0, (300*sizeof(double)));
+  memset( tau, 0.0, (300*sizeof(double)));
   double times[300];
-  std::memset( times, 0.0, (300*sizeof(double)));
+  memset( times, 0.0, (300*sizeof(double)));
   double X[300*6];
-  std::memset( X, 0.0, ((300*6)*sizeof(double)));
+  memset( X, 0.0, ((300*6)*sizeof(double)));
   double normX[300];
-  std::memset( normX, 0.0, (300*sizeof(double)));
-  w1    = *per/2.0;
-  w2    = *per/2.0;
+  memset( normX, 0.0, (300*sizeof(double)));
+  w1    = *Period/2.0;
+  w2    = *Period/2.0;
   z0[0] = r0[0]; z0[1] = r0[1]; z0[2] = r0[2];
   z0[3] = v0[0]; z0[4] = v0[1]; z0[5] = v0[2];
-
   for (int cnt=0; cnt<=n; cnt++){
     tau[cnt]   = -cos(cnt*C_PI/n);
     times[cnt] = tau[cnt]*w2 + w1;
@@ -96,7 +89,6 @@ void polydegree_segments(double* r0, double* v0, double deg, double tol, double*
     normX[cnt] = sqrt(pow(z[0],2) + pow(z[1],2) + pow(z[2],2));
   }
 
-
   // Determine Approximate State and Time at Keplerian Perigee
   double rp[3], vp[3];
   int ind;
@@ -105,10 +97,10 @@ void polydegree_segments(double* r0, double* v0, double deg, double tol, double*
   /* If user specified ICs were not at perigee (i.e. ind!=0) then we need a
     finer grid to find perigee. I put 100 sample points in the vacinity of
     the perigee point and search again for a more accurate value. */
-  if (ind != 0) {
+  if (ind != 0){
     double diff;
     double tnew[300];
-    std::memset( tnew, 0.0, (300*sizeof(double)));
+    memset( tnew, 0.0, (300*sizeof(double)));
     diff = (times[ind+1] - times[ind-1])/99.0;
     tnew[0] = times[ind-1];
     for (int cnt=1; cnt<=n; cnt++){
@@ -121,7 +113,6 @@ void polydegree_segments(double* r0, double* v0, double deg, double tol, double*
     }
     perigee_approx(X,normX,tnew,n,rp,vp,tp,&ind);
   }
-
 
   // Prepare for loop
   int fit_check, coeff, N, Nprev, jmax;
@@ -142,7 +133,6 @@ void polydegree_segments(double* r0, double* v0, double deg, double tol, double*
 
   double f, E, Mf, MM, t0, tf1;
 
-    
   // Loop through different combinations of segments & polynomial degree
   while (fit_check <= coeff){
 
@@ -152,7 +142,7 @@ void polydegree_segments(double* r0, double* v0, double deg, double tol, double*
       E = 2.0*C_PI + E;
     }
     Mf  = E - e*sin(E);         // Mean anomaly
-    MM  = 2.0*C_PI/ *per;    // Mean motion
+    MM  = 2.0*C_PI/ *Period;    // Mean motion
     t0  = 0.0;                  // Initial Time
     tf1 = Mf/MM;                // Final Time (1 segment)
     // Scaling parameters
@@ -161,9 +151,9 @@ void polydegree_segments(double* r0, double* v0, double deg, double tol, double*
 
     // Loop through different values for N
     double G[300*3];
-    std::memset( G, 0.0, ((300*3)*sizeof(double)));
+    memset( G, 0.0, ((300*3)*sizeof(double)));
     double Gprev[300*3];
-    std::memset( Gprev, 0.0, ((300*3)*sizeof(double)));
+    memset( Gprev, 0.0, ((300*3)*sizeof(double)));
     for (int j=0; j<=jmax; j++){
       N = Nvec[j];
 
@@ -176,14 +166,13 @@ void polydegree_segments(double* r0, double* v0, double deg, double tol, double*
           double grav = 0.0;
           radial_gravity(z,tol,deg,&grav);
           double dstate[6] = {0.0};
-          MGM(z, &dstate[3], grav);
+          EGM2008(z, &dstate[3], grav);
           Feval[0] = Feval[0] + pow(grav,2)/pow(deg,2);
           Gprev[ID2(cnt+1,1,N+1)] = dstate[3];
           Gprev[ID2(cnt+1,2,N+1)] = dstate[4];
           Gprev[ID2(cnt+1,3,N+1)] = dstate[5];
         }
       }
-
       if (j > 0){
         for (int cnt=0; cnt<=N; cnt++){
           if (cnt % 2 == 0){
@@ -198,19 +187,18 @@ void polydegree_segments(double* r0, double* v0, double deg, double tol, double*
             double grav = 0.0;
             radial_gravity(z,tol,deg,&grav);
             double dstate[6] = {0.0};
-            MGM(z, &dstate[3], grav);
+            EGM2008(z, &dstate[3], grav);
             Feval[0] = Feval[0] + pow(grav,2)/pow(deg,2);
             G[ID2(cnt+1,1,N+1)] = dstate[3];
             G[ID2(cnt+1,2,N+1)] = dstate[4];
             G[ID2(cnt+1,3,N+1)] = dstate[5];
           }
         }
-        std::memset( Gprev, 0.0, ((300*3)*sizeof(double)));
+        memset( Gprev, 0.0, ((300*3)*sizeof(double)));
         for (int cnt=0; cnt<=N; cnt++){
           Gprev[ID2(cnt+1,1,N+1)] = G[ID2(cnt+1,1,N+1)];
           Gprev[ID2(cnt+1,2,N+1)] = G[ID2(cnt+1,2,N+1)];
           Gprev[ID2(cnt+1,3,N+1)] = G[ID2(cnt+1,3,N+1)];
-          // std::cout << Gprev[1] << std::endl;
         }
       }
 
@@ -218,13 +206,13 @@ void polydegree_segments(double* r0, double* v0, double deg, double tol, double*
       int M;
       M = N;
       double T[(M+1)*N];
-      std::memset( T, 0.0, (((M+1)*N)*sizeof(double)));
+      memset( T, 0.0, (((M+1)*N)*sizeof(double)));
       double A[N*(M+1)];
-      std::memset( A, 0.0, (N*(M+1)*sizeof(double)));
+      memset( A, 0.0, (N*(M+1)*sizeof(double)));
       double gamma[N*3];
-      std::memset( gamma, 0.0, (N*3*sizeof(double)));
+      memset( gamma, 0.0, (N*3*sizeof(double)));
       double Gapprox[(M+1)*3];
-      std::memset( Gapprox, 0.0, ((M+1)*3*sizeof(double)));
+      memset( Gapprox, 0.0, ((M+1)*3*sizeof(double)));
       lsq_chebyshev_fit(1.0,N-1,M,T,A);
       matmul(A,Gprev,gamma,N,M+1,3,N,M+1,N);
       matmul(T,gamma,Gapprox,M+1,N,3,M+1,N,M+1);
@@ -242,25 +230,22 @@ void polydegree_segments(double* r0, double* v0, double deg, double tol, double*
         if (max_gamma < coeff_tol){
           fit_check = fit_check + 1;
           if (fit_check == coeff){
-            break;    // Break if last 3 coeffs are less than the tolerance
+            break;    // Break is last 3 coeffs are less than the tolerance
           }
         }
       }
-        
+
       // Reinitialize
       Nprev = N;
-      std::memset( tau, 0.0, ((300)*sizeof(double)));
-      std::memset( times, 0.0, ((300)*sizeof(double)));
-      std::memset( X, 0.0, ((300*6)*sizeof(double)));
+      memset( tau, 0.0, ((300)*sizeof(double)));
+      memset( times, 0.0, ((300)*sizeof(double)));
+      memset( X, 0.0, ((300*6)*sizeof(double)));
     }
-    // std::cout << "mem" << std::endl;
     *seg = *seg + 2;
     if (fit_check == coeff){
       break;
     }
-    // std::cout << "mem" << std::endl;
   }
   *seg = *seg - 2;
-  std::cout << *seg << std::endl;
 
 }
