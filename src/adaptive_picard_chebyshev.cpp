@@ -44,7 +44,7 @@
 #include <complex>
 #include <cstdlib>
 
-void adaptive_picard_chebyshev(double* r0,double* v0, double t0, double tf, double dt, double deg, double deg_low, double tol, int soln_size, double* Feval, double* Soln){
+void adaptive_picard_chebyshev(double* r0,double* v0, double* PHI0, double t0, double tf, double dt, double deg, double deg_low, double tol, int soln_size, double* Feval, double* Soln){
 
   /* 1. DETERMINE DEGREE/SEGMENTATION SCHEME
   Compute the polynomial degree and number of segments per orbit that will
@@ -83,6 +83,7 @@ void adaptive_picard_chebyshev(double* r0,double* v0, double t0, double tf, doub
   memset( tvec, 0.0, ((seg+1)*sizeof(double)));
   prepare_propagator(r0,v0,t0,tf,dt,tp,tol,N,M,seg,&prep_HS,t_orig,tvec,P1,P2,T1,T2,A,Ta);
 
+
   /* 3. PICARD-CHEBYSHEV PROPAGATOR
   Propagate from t0 to tf, iterating on each segment (Picard Iteration), until
   completion. */
@@ -98,14 +99,20 @@ void adaptive_picard_chebyshev(double* r0,double* v0, double t0, double tf, doub
   memset( W1, 0.0, (sz*sizeof(double)));
   double W2[sz];
   memset( W2, 0.0, (sz*sizeof(double)));
-  picard_chebyshev_propagator(r0,v0,t0,tf,deg,deg_low,tol,Period,tvec,t_orig,seg,N,M,&prep_HS,coeff_size,soln_size,&total_seg,
-    P1,P2,T1,T2,A,Ta,W1,W2,Feval,ALPHA,BETA,segment_times);
+  double *ETA;
+  ETA = (double *) calloc((coeff_size*36), sizeof(double));
+
+  printf("seg %i\n",total_seg);
+  
+  picard_chebyshev_propagator(r0,v0, PHI0, t0,tf,deg,deg_low,tol,Period,tvec,t_orig,seg,N,M,&prep_HS,coeff_size,soln_size,&total_seg,P1,P2,T1,T2,A,Ta,W1,W2,Feval,ALPHA,BETA, ETA, segment_times);
+
 
   // /* 4. INTERPOLATE SOLUTION
   // The Chebyshev coefficients from each of the orbit segments are used to compute
   // the solution (position & velocity) at the user specified times. */
-  interpolate(ALPHA,BETA,soln_size,coeff_size,N,segment_times,W1,W2,t0,tf,dt,total_seg,Soln);
+  interpolate(ALPHA,BETA, ETA, soln_size,coeff_size,N,segment_times,W1,W2,t0,tf,dt,total_seg,Soln);
 
   free(ALPHA);
   free(BETA);
+  free(ETA);
 }

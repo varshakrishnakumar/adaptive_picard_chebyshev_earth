@@ -48,8 +48,10 @@
 #include "perturbed_gravity.h"
 #include "picard_error_feedback.h"
 #include "EGM2008.h"
+#include "central_difference.h"
 
-void picard_iteration(double* Xint, double* Vint, double* X, double* V, double* times, int N, int M, double deg, double deg_low, int hot, double tol, double* P1, double* P2, double* T1, double* T2, double* A, double* Feval, double* Alpha, double* Beta){
+void picard_iteration(double* Xint, double* Vint, double* PHI0, double* X, double* V, double* times, int N, int M, double deg, double deg_low, int hot, double tol, double* P1, double* P2, double* T1, double* T2, double* A, double* Feval, double* Alpha, double* Beta, double* Eta){
+
 
   // Initialization
   double xI[3]        = {0.0};
@@ -87,6 +89,11 @@ void picard_iteration(double* Xint, double* Vint, double* X, double* V, double* 
   double del_a[(M+1)*3];
   memset( del_a, 0.0, ((M+1)*3*sizeof(double)));
 
+
+  double PHIo[(N+1)*N];
+  memset(PHIo, 0.0, (N+1)*N*sizeof(double));
+
+
   int itr, MaxIt;
   double err, w2;
   itr   = 0;
@@ -98,17 +105,44 @@ void picard_iteration(double* Xint, double* Vint, double* X, double* V, double* 
     err = 1e-2; // Prevents low fidelity J2 to J6 computations
   }
 
+  double* tmp = new double[36]();
+  std::memcpy(tmp, PHI0, 36*sizeof(double));
+  double** PHI = new double*[37];
+  for(int i = 0; i < 37; i++) {
+    PHI[i] = new double[6]();
+  }
+
+  for(int i = 0; i < 37; i++) {
+    for(int j = 0; j < 6; j++) {
+      PHI[i][j] = tmp[j];
+    }
+  }
+
+  for(int i = 0; i < 37; i++) {
+    delete[] PHI[i];
+  }
+  delete[] PHI;  //delete memory 
+
+
+
+
+
   while(err > tol){
 
     for (int i=1; i<=M+1; i++){
       for (int j=1; j<=3; j++){
         xI[j-1] = X[ID2(i,j,M+1)];
         vI[j-1] = V[ID2(i,j,M+1)];
+
+      }
+      for (int j=1; j<=N; j++) {
+        for (int k=1; k<=N; k++) {
+          PHIo[(j-1)*N+k-1] = PHI[i][ID2(j,k,36)];
+        }
       }
       // Convert from ECI to ECEF
       eci2ecef(times[i-1],xI,vI,xECEF,vECEF);
       // Compute Variable Fidelity Gravity
-//       perturbed_gravity(times[i-1],xECEF,err,i,M,deg,hot,aECEF,tol,&itr,Feval);
       perturbed_gravity(times[i-1],xECEF,err,i,M,deg,deg_low,hot,aECEF,tol,&itr,Feval);
       // Convert from ECEF to ECI
       ecef2eci(times[i-1],aECEF,aECI);
@@ -237,5 +271,69 @@ void picard_iteration(double* Xint, double* Vint, double* X, double* V, double* 
     }
 
   }
+
+
+  double errSTM = 1;
+  int itrSTM = 0;
+  double PHI_dot[37*36] = {0.0};
+  double PHInew[36][36] = {0.0};
+
+
+  
+  while (errSTM > tol*10) {
+    // STM Dynamics
+    central_difference(times[0], X, PHI[0], deg, PHI_dot);
+
+    for (int i = 0; i < 36; i++) {
+      for (int j = 0; j < 36; j++) {
+        double temp = 0.0;
+        for (int k = 0; k < 37; k++) {
+          temp += T1[i*37+k]*Eta[k*36+j];
+        }
+        PHInew[i][j] += temp;
+      }
+    }
+
+    
+    // Integrate
+    for (int i = 0; i < 37; i++) {
+      for (int j = 0; j < 36; j++) {
+        Eta[i*36+j] = w2 * P1[i*(N-1) + j] * A[(N-1)*i + j] * PHI_dot[i*36+j] + PHIo[i*36+j];
+      }
+    }
+    for (int i = 0; i < 36; i++) {
+        for (int j = 0; j < 36; j++) {
+            for (int k = 0; k < 37; k++) {
+              PHInew[i][j] = PHInew[i][j] + T1[i*37+k]*Eta[k*36+j];
+
+            }
+        }
+    }
+
+    
+    // Error
+    errSTM = 0.0;
+    for (int i = 0; i < 36; i++) {
+        for (int j = 0; j < 36; j++) {
+            double diff = std::abs(PHI[i*36+j] - PHInew[i*36+j]);
+            if (diff > errSTM) {
+              errSTM = diff;
+            }
+        }
+    }
+    
+    // Update
+    std::memcpy(PHI, PHInew, 37*36*sizeof(double));
+    
+    // Iteration Counter
+    if (itrSTM < 30) {
+        itrSTM++;
+    } else {
+        itrSTM--;
+        break;
+    }
+}
+
+
 
 }

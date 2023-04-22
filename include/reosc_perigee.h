@@ -22,7 +22,7 @@
 #include <cstdlib>
 #include "const.h"
 
-void reosc_perigee(double* X, double* V, double* times, double* Alpha, double* Beta,
+void reosc_perigee(double* X, double* V, double* PHI0, double* times, double* Alpha, double* Beta, double* Eta, 
   double tf, double t_final, double* t_orig, int N, int M, int* k, int seg, int* prep_HS,
   double tol, double* orb_end, double* tvec, double* r0, double* v0);
 

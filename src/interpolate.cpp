@@ -36,7 +36,7 @@
 #include "c_functions.h"
 #include "interpolate.h"
 
-void interpolate(double* ALPHA, double* BETA, int soln_size, int coeff_size, int N, double* seg_times,
+void interpolate(double* ALPHA, double* BETA, double* ETA, int soln_size, int coeff_size, int N, double* seg_times,
   double* W1, double* W2, double t0, double tf, double dt, int total_segs, double* Soln){
 
   int prev_cnt = 0;
@@ -61,6 +61,8 @@ void interpolate(double* ALPHA, double* BETA, int soln_size, int coeff_size, int
     double Alpha[(N+1)*3];
     memset( Alpha, 0.0, ((N+1)*3*sizeof(double)));
     int sz = (int)ceil(1.1*tf/total_segs/dt);
+    double Eta[(N+1)*N];
+    memset(Eta, 0.0, (N+1)*N*sizeof(double));
     double tt[sz];
     memset( tt, 0.0, ((sz)*sizeof(double)));
     double tau[sz];
@@ -96,6 +98,8 @@ void interpolate(double* ALPHA, double* BETA, int soln_size, int coeff_size, int
     memset( Tv, 0.0, ((cnt*N)*sizeof(double)));
     double Tp[cnt*(N+1)];
     memset( Tp, 0.0, ((cnt*(N+1))*sizeof(double)));
+    double Tpstm[cnt*(N+1)];
+    memset( Tpstm, 0.0, ((cnt*(N+1))*sizeof(double)));
     for (int t=1; t<=cnt; t++){
       for (int kk=0; kk<=N-1; kk++){
         // Velocity
@@ -104,6 +108,10 @@ void interpolate(double* ALPHA, double* BETA, int soln_size, int coeff_size, int
       for (int kk=0; kk<=N; kk++){
         // Position
         Tp[ID2(t,kk+1,cnt)] = cos(kk*acos(tau[t-1]));
+      }
+      for (int kk=0; kk<=N; kk++){
+        // Position
+        Tpstm[ID2(t,kk+1,cnt)] = cos(kk*acos(tau[t-1]));
       }
     }
 
@@ -139,6 +147,22 @@ void interpolate(double* ALPHA, double* BETA, int soln_size, int coeff_size, int
       Soln[ID2(p+prev_cnt,2,soln_size)] = x_interp[ID2(p,2,cnt)];
       Soln[ID2(p+prev_cnt,3,soln_size)] = x_interp[ID2(p,3,cnt)];
       // printf("Soln %f\t%f\t%f\n",Soln[ID2(p+prev_cnt,1,soln_size)],Soln[ID2(p+prev_cnt,2,soln_size)],Soln[ID2(p+prev_cnt,3,soln_size)]);
+    }
+
+    // STM Coefficients for a Segment
+    for (int p = 1; p<= N+1; p++) {
+      for (int q=1; q<= N; q++) {
+        Eta[ID2(p,q,N+1)] = ETA[ID2(p+((i-1)*(N+1)), q, coeff_size)];
+      }
+    }
+    double stm_interp[cnt*36];
+    memset( x_interp, 0.0, ((cnt*36)*sizeof(double)));
+    matmul(Tp, Eta, stm_interp, cnt, N+1, N, cnt, N+1, cnt);
+
+    for (int p = 1; p<= cnt; p++) {
+      for (int q = 1; q <= N; q++) {
+        Soln[ID2(p+prev_cnt,q+6,soln_size)] = stm_interp[ID2(p,q,cnt)];
+      }
     }
     // printf("tfdt %f\t%f\n",tf,dt);
     prev_cnt = prev_cnt + cnt;  // Counter to track position in Soln array

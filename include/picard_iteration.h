@@ -23,6 +23,6 @@
 #include <cstdlib>
 #include "const.h"
 
-void picard_iteration(double* Xint, double* Vint, double* X, double* V, double* times, int N, int M, double deg, double deg_low, int hot, double tol, double* P1, double* P2, double* T1, double* T2, double* A, double* Feval, double* Alpha, double* Beta);
+void picard_iteration(double* Xint, double* Vint, double* PHI0, double* X, double* V, double* times, int N, int M, double deg, double deg_low, int hot, double tol, double* P1, double* P2, double* T1, double* T2, double* A, double* Feval, double* Alpha, double* Beta, double* Eta);
 
 // #endif

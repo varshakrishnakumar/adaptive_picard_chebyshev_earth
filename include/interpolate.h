@@ -23,7 +23,7 @@
 #include <cstdlib>
 #include "const.h"
 
-void interpolate(double* ALPHA, double* BETA, int soln_size, int coeff_size, int N, double* segment_times,
+void interpolate(double* ALPHA, double* BETA, double* ETA, int soln_size, int coeff_size, int N, double* segment_times,
   double* W1, double* W2, double t0, double tf, double dt, int total_seg, double* Soln);
 
 // #endif

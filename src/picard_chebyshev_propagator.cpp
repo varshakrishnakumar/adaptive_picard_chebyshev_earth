@@ -50,9 +50,7 @@
 #include "reosc_perigee.h"
 #include "c_functions.h"
 
-void picard_chebyshev_propagator(double* r0, double* v0, double t0, double t_final, double deg, double deg_low, double tol, double Period, double* tvec, double* t_orig, int seg, int N, int M, int* prep_HS, int coeff_size, int soln_size, int* total_seg,
-   double* P1, double* P2, double* T1, double* T2, double* A, double* Ta, double* W1, double* W2, double* Feval,
-   double* ALPHA, double* BETA, double* segment_times){
+void picard_chebyshev_propagator(double* r0, double* v0, double* PHI0, double t0, double t_final, double deg, double deg_low, double tol, double Period, double* tvec, double* t_orig, int seg, int N, int M, int* prep_HS, int coeff_size, int soln_size, int* total_seg, double* P1, double* P2, double* T1, double* T2, double* A, double* Ta, double* W1, double* W2, double* Feval, double* ALPHA, double* BETA, double* ETA, double* segment_times){
 
   int loop    = 0;      // Break loop condition
   int k       = 0;      // Counter: segments per orbit
@@ -65,6 +63,8 @@ void picard_chebyshev_propagator(double* r0, double* v0, double t0, double t_fin
   memset( HotX, 0.0, (seg*(M+1)*3*sizeof(double)));
   double HotV[seg*(M+1)*3];
   memset( HotV, 0.0, (seg*(M+1)*3*sizeof(double)));
+
+  // printf("r0 = (%lf, %lf, %lf)\n", r0[0], r0[1], r0[2]);
 
   // PROPAGATION
   while (loop == 0){
@@ -102,6 +102,8 @@ void picard_chebyshev_propagator(double* r0, double* v0, double t0, double t_fin
     memset( Beta, 0.0, (N*3*sizeof(double)));
     double Alpha[(N+1)*3];
     memset( Alpha, 0.0, ((N+1)*3*sizeof(double)));
+    double Eta[(N+1)*N];
+    memset(Eta, 0.0, (N+1)*N*sizeof(double));
 
     // KEPLERIAN WARM START
     for (int cnt=0; cnt<=M; cnt++){
@@ -123,20 +125,10 @@ void picard_chebyshev_propagator(double* r0, double* v0, double t0, double t_fin
     memcpy(WSX,X,(M+1)*3*sizeof(double));
     memcpy(WSV,V,(M+1)*3*sizeof(double));
 
-    // HOT START (after 1+ orbits)
-    // if (hot == 1){
-    //   for (int i = 1; i<=M+1; i++){
-    //     X[ID2(i,1,M+1)] = X[ID2(i,1,M+1)] + HotX[ID2(i+(k*(M+1)),1,seg*(M+1))];
-    //     X[ID2(i,2,M+1)] = X[ID2(i,2,M+1)] + HotX[ID2(i+(k*(M+1)),2,seg*(M+1))];
-    //     X[ID2(i,3,M+1)] = X[ID2(i,3,M+1)] + HotX[ID2(i+(k*(M+1)),3,seg*(M+1))];
-    //     V[ID2(i,1,M+1)] = V[ID2(i,1,M+1)] + HotV[ID2(i+(k*(M+1)),1,seg*(M+1))];
-    //     V[ID2(i,2,M+1)] = V[ID2(i,2,M+1)] + HotV[ID2(i+(k*(M+1)),2,seg*(M+1))];
-    //     V[ID2(i,3,M+1)] = V[ID2(i,3,M+1)] + HotV[ID2(i+(k*(M+1)),3,seg*(M+1))];
-    //   }
-    // }
+
 
     // PICARD ITERATION
-    picard_iteration(r0,v0,X,V,times,N,M,deg,deg_low,hot,tol,P1,P2,T1,T2,A,Feval,Alpha,Beta);
+    picard_iteration(r0,v0,PHI0,X,V,times,N,M,deg,deg_low,hot,tol,P1,P2,T1,T2,A,Feval,Alpha,Beta, Eta);
 
     // Loop exit condition
     if (fabs(tf - t_final)/tf < 1e-12){
@@ -172,7 +164,7 @@ void picard_chebyshev_propagator(double* r0, double* v0, double t0, double t_fin
     produce a solution that satisfies the required tolerance. This effect
     increases with increasing eccentricity. */
     double orb_end = 0.0;
-    reosc_perigee(X,V,times,Alpha,Beta,tf,t_final,t_orig,N,M,&k,seg,prep_HS,tol,&orb_end,tvec,r0,v0);
+    reosc_perigee(X,V,PHI0, times,Alpha,Beta,Eta, tf,t_final,t_orig,N,M,&k,seg,prep_HS,tol,&orb_end,tvec,r0,v0);
 
     // Segments per orbit counter
     k = k+1;
@@ -189,6 +181,12 @@ void picard_chebyshev_propagator(double* r0, double* v0, double t0, double t_fin
       ALPHA[ID2(i+seg_cnt*(N+1),3,coeff_size)] = Alpha[ID2(i,3,N+1)];
     }
 
+    for (int i = 1; i <= (N+1); i++) {
+      for (int j = 1; j <= N; j++) {
+        ETA[ID2(i+(seg_cnt*(N+1)),j,coeff_size)] = Eta[ID2(i,j,(N+1))];
+      }
+    }
+
     segment_times[seg_cnt+1] = tf;
     if (orb_end != 0.0){
       segment_times[seg_cnt+1] = orb_end;
@@ -199,5 +197,6 @@ void picard_chebyshev_propagator(double* r0, double* v0, double t0, double t_fin
 
   }
   *total_seg = seg_cnt;
+  // printf("PHI0 = (%lf, %lf, %lf)\n", PHI0[0]);
 
 }

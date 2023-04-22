@@ -40,7 +40,7 @@
 #include "c_functions.h"
 #include "rv2elm.h"
 
-void reosc_perigee(double* X, double* V, double* times, double* Alpha, double* Beta,
+void reosc_perigee(double* X, double* V, double* PHI0, double* times, double* Alpha, double* Beta, double* Eta, 
   double tf, double t_final, double* t_orig, int N, int M, int* k, int seg, int* prep_HS,
   double tol, double* orb_end, double* tvec, double* r0, double* v0){
 
@@ -93,6 +93,9 @@ void reosc_perigee(double* X, double* V, double* times, double* Alpha, double* B
           while (err > tol){
             for (int kk=0; kk<=N; kk++){
               TA[kk] = cos(kk*acos(TAU));
+              for(int j=0; j<=N; j++) {
+                PHI0[kk*N+j] = TA[kk]*Eta[ID2(j+1,kk+1,N+1)];
+              }
             }
             for (int kk=0; kk<=N-1; kk++){
               TB[kk] = cos(kk*acos(TAU));
@@ -103,6 +106,7 @@ void reosc_perigee(double* X, double* V, double* times, double* Alpha, double* B
               r0[0] = r0[0] + TA[j]*Alpha[ID2(j+1,1,N+1)];
               r0[1] = r0[1] + TA[j]*Alpha[ID2(j+1,2,N+1)];
               r0[2] = r0[2] + TA[j]*Alpha[ID2(j+1,3,N+1)];
+              
             }
             for (int j=0; j<=N-1; j++){
               v0[0] = v0[0] + TB[j]*Beta[ID2(j+1,1,N)];

@@ -33,10 +33,11 @@ int main(){
   // scanf("%d", &deg_low);
 
   
-  double r0[3] = {7000.0, 0.0, 0.0};                // Initial Position (km)
-  double v0[3] = {0.0, 8.003798178945150, 0.0};     // Initial Velocity (km/s)
+  double r0[3] = {66403.0, 0.0, 0.0};                // Initial Position (km)
+  double v0[3] = {0.0, 8.1259, 0.0};     // Initial Velocity (km/s)
+  double PHI0[36] = {0.0};
   double t0    = 0.0;                               // Initial Times (s)
-  double tf    = 3.0*7.121081577578024e+03;         // Final Time (s)
+  double tf    = 10.0*60.0;         // Final Time (s)
   // MEO
   // double r0[3] = {9000.0, 0.0, 0.0};                                // Initial Position (km)
   // double v0[3] = {0.0, 6.7419845635570, 1.806509319188210};         // Initial Velocity (km/s)
@@ -77,8 +78,11 @@ int main(){
   clock_t startTime = clock();
   for (int tt=0; tt<=1; tt++){
     // printf("check 1");
-    adaptive_picard_chebyshev(r0,v0,t0,tf,dt,deg,deg_low,tol,soln_size,Feval,Soln);
+    adaptive_picard_chebyshev(r0,v0, PHI0, t0,tf,dt,deg,deg_low,tol,soln_size,Feval,Soln);
+  
+
   }
+  // printf("check2");
   clock_t endTime = clock();
   float elapsedTime = ((float) (endTime - startTime))/CLOCKS_PER_SEC/(1.0);
   printf("Elapsed time: %f s\t",elapsedTime);
